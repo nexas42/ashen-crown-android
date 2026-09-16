@@ -1,0 +1,39 @@
+name: Build Ashen Crown APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "Ashen-Crown-Android-Source.zip"
+      - ".github/workflows/build-apk.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+
+      - name: Extract project
+        run: |
+          mkdir project
+          unzip -q Ashen-Crown-Android-Source.zip -d project
+
+      - name: Build APK
+        working-directory: project
+        run: gradle assembleDebug --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Ashen-Crown-APK
+          path: project/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
